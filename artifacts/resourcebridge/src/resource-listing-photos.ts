@@ -23,21 +23,21 @@ import travelOrganizerKit from './assets/other/travel-organizer-kit.jpeg';
 import beginnerRoboticsKit from './assets/learning/beginner-robotics-kit.jpeg';
 import languageLearningBooks from './assets/learning/language-learning-books.jpeg';
 import scienceExperimentKit from './assets/learning/science-experiment-kit.jpeg';
-import digitalMicroscopeSuite from './assets/technical/digital-microscope-suite.jpeg';
+import digitalMicroscopeSuite from './assets/technical/digital-microscope-suite.webp';
 import deviceSetupWorkshop from './assets/technical/device-setup-workshop.jpeg';
-import gpuWorkstation from './assets/technical/gpu-workstation.jpeg';
-import materialTestingBench from './assets/technical/material-testing-bench.jpeg';
+import gpuWorkstation from './assets/technical/gpu-workstation.webp';
+import materialTestingBench from './assets/technical/material-testing-bench.webp';
 import threeDDesignConsultation from './assets/technical/3d-design-consultation.jpeg';
 import websiteHelpSession from './assets/technical/website-help-session.jpeg';
-import benchtopSpectrometer from './assets/equipment/benchtop-spectrometer.jpeg';
+import benchtopSpectrometer from './assets/equipment/benchtop-spectrometer.webp';
 import cordlessDrillKit from './assets/equipment/cordless-drill-kit.jpeg';
 import foldingWorkbench from './assets/equipment/folding-workbench.jpeg';
 import gardenToolSet from './assets/equipment/garden-tool-set.jpeg';
 import laserCutter from './assets/equipment/laser-cutter.jpeg';
 import portablePaSystem from './assets/equipment/portable-pa-system.jpeg';
-import portableProjectorKit from './assets/equipment/portable-projector-kit.jpeg';
-import thermalCamera from './assets/equipment/thermal-camera.jpeg';
-import workshop3dPrinter from './assets/equipment/workshop-3d-printer.jpeg';
+import portableProjectorKit from './assets/equipment/portable-projector-kit.webp';
+import thermalCamera from './assets/equipment/thermal-camera.webp';
+import workshop3dPrinter from './assets/equipment/workshop-3d-printer.webp';
 import laptopChargerKit from './assets/electronics/laptop-charger-kit.jpeg';
 import mirrorlessCameraKit from './assets/electronics/mirrorless-camera-kit.jpeg';
 import tabletDigitalPen from './assets/electronics/tablet-digital-pen.jpeg';
@@ -45,11 +45,11 @@ import communityHall from './assets/spaces/community-hall.jpg';
 import communityMeetingRoom from './assets/spaces/community-meeting-room.jpg';
 import conferenceRoom from './assets/spaces/conference-room.jpg';
 import dancePracticeStudio from './assets/spaces/dance-practice-studio.jpg';
-import northCampusMediaStudio from './assets/spaces/north-campus-media-studio.jpg';
+import northCampusMediaStudio from './assets/spaces/north-campus-media-studio.webp';
 import podcastRecordingBooth from './assets/spaces/podcast-recording-booth.jpg';
 import productPhotographySet from './assets/spaces/product-photography-set.jpg';
 import quietStudyRoom from './assets/spaces/quiet-study-room.jpg';
-import seminarRoom204 from './assets/spaces/seminar-room-204.jpg';
+import seminarRoom204 from './assets/spaces/seminar-room-204.webp';
 import woodworkingShop from './assets/spaces/woodworking-shop.jpg';
 
 const suppliedListingPhotos: Readonly<Record<string, Readonly<Record<string, string>>>> = {
@@ -59,6 +59,7 @@ const suppliedListingPhotos: Readonly<Record<string, Readonly<Record<string, str
     'Conference Room': conferenceRoom,
     'Dance Practice Studio': dancePracticeStudio,
     'North Campus Media Studio': northCampusMediaStudio,
+    'Seminar Hall': seminarRoom204,
     'Podcast Recording Booth': podcastRecordingBooth,
     'Product Photography Set': productPhotographySet,
     'Quiet Study Room': quietStudyRoom,
@@ -135,8 +136,12 @@ export function getResourceCoverPhoto(
   resource: Pick<ResourceBridgeResource, 'photos' | 'category' | 'ownerId' | 'name'>,
 ) {
   if (resource.photos.length > 0) return resource.photos[0];
-  // Supplied photos are for their exact demo listings, never real owner data.
-  if (!resource.ownerId.startsWith('resourcebridge-demo:')) return undefined;
+  // The owner endpoint normalizes demo-seeded listings to its public demo ID.
+  // Keep these bundled covers limited to demo data, never real owner listings.
+  const isDemoOwner =
+    resource.ownerId.startsWith('resourcebridge-demo:') ||
+    resource.ownerId === 'resourcebridge-public-demo:owner';
+  if (!isDemoOwner) return undefined;
   const name = resource.name.replace(/^\[Sample\]\s*/, '');
   const url = suppliedListingPhotos[resource.category]?.[name];
   return url ? { url, altText: name } : undefined;

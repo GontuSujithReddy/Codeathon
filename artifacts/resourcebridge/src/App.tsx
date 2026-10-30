@@ -626,7 +626,10 @@ function ExplorePage({ categorySlug, searchMode = false }: { categorySlug?: stri
   const categoryCounts = useMemo(() => new Map(resourceCategories.map(item => [item.value, (query.data ?? []).filter(resource => resource.category === item.value).length])), [query.data]);
   const categoryPreviews = useMemo(() => new Map(resourceCategories.map(item => [
     item.value,
-    (query.data ?? []).filter(resource => resource.category === item.value).flatMap(resource => resource.photos.slice(0, 1)).slice(0, 3),
+    (query.data ?? []).filter(resource => resource.category === item.value).flatMap(resource => {
+      const photo = getResourceCoverPhoto(resource);
+      return photo ? [photo] : [];
+    }).slice(0, 3),
   ])), [query.data]);
   const canShare = !user || profileQuery.data?.profile?.accountType === 'owner';
   const emptyResultCard = <div className="rb-card"><EmptyState title={searchMode && !search.trim() ? 'Search the resource directory' : selectedCategory ? 'No listings in this category yet' : 'No matching resources'} copy={searchMode && !search.trim() ? 'Enter a name, resource type, place, or organization above.' : search || organization !== 'all' || searchCategory !== 'all' ? 'Try a different search or clear your filters.' : 'Check back soon for new resources in this section.'} action={search || organization !== 'all' || searchCategory !== 'all' ? <Button onClick={() => { setSearch(''); setOrganization('all'); setSearchCategory('all'); if (searchMode) setLocation('/explore/search?q=&category=all', { replace: true }); }} testId="button-clear-filters">Clear filters</Button> : undefined}/></div>;
@@ -927,7 +930,7 @@ function ResourceDetailPage() {
    const isSample=r.ownerId==='resourcebridge-demo:category-samples';
    const needsReview=r.requiresTraining||r.supervised;
    const send=(e:FormEvent)=>{e.preventDefault();booking.mutate({data:{resourceId:r.id,startAt:new Date(request.startAt).toISOString(),endAt:new Date(request.endAt).toISOString(),purpose:request.purpose,teamSize:Number(request.teamSize),acknowledgedRules:true}},{onSuccess:()=>{void Promise.all([qc.invalidateQueries({queryKey:getListResourceBridgeBookingsQueryKey()}),qc.invalidateQueries({queryKey:getGetResourceBridgeDashboardQueryKey()})]);setShowRequest(false);setToast('Your access request has been sent.');},onError:error=>setToast(apiErrorMessage(error,'Request could not be sent. Please review your dates and try again.'))});};
-    const photo = r.photos[0];
+    const photo = getResourceCoverPhoto(r);
     return <>
       <ScrollReveal key={`detail-heading-${r.id}`} motion="from-left" className="rb-detail-heading-reveal"><Heading eyebrow={`${r.organizationName} · ${r.organizationType}`} title={r.name} description={`${resourceCategoryLabel(r.category)} · ${r.location}`} action={<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{isOwner&&<Button href={`/resources/${r.id}/edit`} variant="primary" testId="button-edit-resource">Edit listing</Button>}<Button href="/explore" testId="button-back-explore">Back to explore</Button></div>}/></ScrollReveal>
       <div className="rb-detail-grid">
